@@ -35,6 +35,20 @@
 #include "mdp.h"
 #include "mdp4.h"
 
+#include "../board-8064.h"
+#include <asm/mach-types.h>
+#include <linux/pwm.h>
+#include <linux/mfd/pm8xxx/pm8921.h>
+#include <linux/gpio.h>
+
+#define PWM_FREQ_HZ 20000
+#define PWM_PERIOD_p1USEC (USEC_PER_SEC * 10 / PWM_FREQ_HZ)
+
+#define gpio_EN_VDD_BL PM8921_GPIO_PM_TO_SYS(23)
+#define gpio_LCD_BL_EN PM8921_GPIO_PM_TO_SYS(30)
+
+extern struct pwm_device *bl_lpm;
+
 u32 dsi_irq;
 u32 esc_byte_ratio;
 
@@ -45,6 +59,7 @@ static int mipi_dsi_remove(struct platform_device *pdev);
 
 static int mipi_dsi_off(struct platform_device *pdev);
 static int mipi_dsi_on(struct platform_device *pdev);
+static void mipi_dsi_shutdown(struct platform_device *pdev);
 static int mipi_dsi_fps_level_change(struct platform_device *pdev,
 					u32 fps_level);
 
@@ -57,13 +72,42 @@ static int vsync_gpio = -1;
 static struct platform_driver mipi_dsi_driver = {
 	.probe = mipi_dsi_probe,
 	.remove = mipi_dsi_remove,
-	.shutdown = NULL,
+	.shutdown = mipi_dsi_shutdown,
 	.driver = {
 		   .name = "mipi_dsi",
 		   },
 };
 
 struct device dsi_dev;
+
+static void mipi_dsi_shutdown(struct platform_device *pdev)
+{
+	int ret;
+	if(machine_is_apq8064_duma()) {
+		printk("%s+\n", __func__);
+
+		gpio_set_value_cansleep(gpio_LCD_BL_EN, 0);
+
+		mdelay(20);
+
+		if (bl_lpm) {
+			printk("Disable PWM.\n");
+			ret = pwm_config_in_p1us_unit(bl_lpm, 0, PWM_PERIOD_p1USEC);
+			if (ret) {
+				pr_err("pwm_config on lpm failed %d\n", ret);
+			}
+				pwm_disable(bl_lpm);
+		}
+
+		mdelay(20);
+
+		gpio_set_value_cansleep(gpio_EN_VDD_BL, 0);
+
+		printk("%s-\n", __func__);
+	}
+}
+
+
 
 static int mipi_dsi_fps_level_change(struct platform_device *pdev,
 					u32 fps_level)

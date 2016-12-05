@@ -178,6 +178,7 @@ config ARCH_MSM8960
 	select MSM_KRAIT_WFE_FIXUP
 	select MSM_IOMMU_GPU_SYNC
 	select MSM_CPU_PWRCTL
+	select HAS_MACH_MEMUTILS
 
 config ARCH_MSM8930
 	bool "MSM8930"
@@ -1630,10 +1631,10 @@ config MSM_CPU_FREQ_MIN
 endif # CPU_FREQ_MSM
 
 config CPU_VOLTAGE_TABLE
-	bool "Enable CPU Voltage Table via sysfs for adjustments"
+	bool "Enable CPU Voltage table via sysfs for adjustments"
 	default n
 	help
-	  krait User Voltage Control
+	  Krait User Voltage Control
 
 config MSM_AVS_HW
 	bool "Enable Adaptive Voltage Scaling (AVS)"
@@ -2631,5 +2632,10 @@ config FORCE_FAST_CHARGE
 	  A simple sysfs interface to force adapters that are detected as USB
 	  to charge as AC.
 
+config HAS_MACH_MEMUTILS
+	default n
+	bool "Motorola MSM memcpy enhancements"
+	help
+	Faster memcpy performance for Krait
 
 endif

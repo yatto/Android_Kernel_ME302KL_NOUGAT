@@ -189,11 +189,11 @@ static void cap1106_init(void) {
 	struct cap1106_i2c_platform_data *pdata;
 
 	pdata = (struct cap1106_i2c_platform_data *) i2c_cap1106[0].platform_data;
-	/*if ((asustek_get_hw_rev() == HW_REV_C)
+	if ((asustek_get_hw_rev() == HW_REV_C)
 	        || (asustek_get_hw_rev() == HW_REV_D)
 			|| (asustek_get_hw_rev() == HW_REV_E)) {
 		pdata->app2mdm_enable = 1;
-	}*/
+	}
 
 	i2c_register_board_info(APQ_8064_GSBI1_QUP_I2C_BUS_ID, i2c_cap1106,
 	        ARRAY_SIZE(i2c_cap1106));
